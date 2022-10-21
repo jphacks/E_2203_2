@@ -10,10 +10,7 @@ path = 'jphack/test.csv'
 
 df = pd.read_csv(path)
 
-print(df)
-
 print(df)  #最初の5行のデータ表示
-print(df.describe)  #データの概要を数値化
 
 
 #大小関係を標準化する
@@ -37,12 +34,22 @@ model = KMeans(n_clusters = 3, random_state =1)
 
 model.fit(df_sc)
 
+
+
 cluster = model.labels_
 
+print(df)
 
-df['cluster'] = cluster
+
+df['cluster'] = cluster #dfに勝手にclusterが付け加えられてる…
+
+df.to_csv("kmeans_model.csv") #xgboostの学習用にcsvファイル保存
+
+print(df)
 
 print(cluster)
+
+print(df)
 
 #分布グラフ表示
 
@@ -76,13 +83,16 @@ cluster_n =  df[df['cluster']== n]
 
 print(cluster_n)
 
-print(df[df.cluster == n])
+print(df)
 
 
 
 #同じクラスタのアイテムに絞ってXGBoost
 
 # XGBoost
+
+print(df)
+
 from sklearn.model_selection import train_test_split
 import xgboost as xgb
 
@@ -109,9 +119,13 @@ model = xgb.train(params, dtrain, num_round, verbose_eval=10, evals=watchlist)
 
 
 
-#推論実行、読み込んだデータはラベルがnull、特徴から推論したラベルをぶち込む
+#推論実行,特徴から推論したラベルをぶち込む
 
-new_data = cluster_n[-1:].drop(['cluster'], axis=1)
+#new_dataのdfの部分は、新しく生成されたcsvファイルをデータフレームにしてから挿入
+
+print(df)
+
+new_data = df[-1:].drop(['cluster'], axis=1)
 
 print(new_data)
 
@@ -167,19 +181,9 @@ print(len(recommend_data))
 
 recommend_df = recommend_data['food'].value_counts()
 
+recommend_df.rename()
+
 print(recommend_df)
-
-
-
-cluster_n =  df[df['cluster']== n]
-
-
-
-from sklearn.metrics import accuracy_score
-
-pred = model.predict(dtest)
-score = accuracy_score(test_y, pred) #精度の確認できん　　なんでだよ
-print(f'{score:.4f}')
 
 
 
